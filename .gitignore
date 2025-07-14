@@ -17,3 +17,6 @@ __MACOSX
 .cursorrules
 
 .env
+
+*.png
+internal_*.md
