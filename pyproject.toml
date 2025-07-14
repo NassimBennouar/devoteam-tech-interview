@@ -24,6 +24,7 @@ dependencies = [
     "plotly>=6.2.0",
     "sqlalchemy>=2.0.41",
     "aiosqlite>=0.21.0",
+    "pytest-asyncio>=1.0.0",
 ]
 
 [tool.pytest.ini_options]
