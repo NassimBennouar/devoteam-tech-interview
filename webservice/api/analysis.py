@@ -1,8 +1,10 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from webservice.services.llm_analysis import LLMAnalysisService
 from webservice.services.anomaly_detection import AnomalyDetectionService
 from webservice.models.analysis import AnalysisResult
-from webservice.api.metrics import get_latest_metrics
+from webservice.api.metrics import get_latest_metrics_from_db
+from webservice.db import get_async_session
+from sqlalchemy.ext.asyncio import AsyncSession
 import logging
 import os
 
@@ -14,11 +16,11 @@ DEBUG = os.getenv("DEBUG", "false").lower() == "true"
 
 
 @router.get("/analysis", response_model=AnalysisResult)
-async def get_analysis():
+async def get_analysis(session: AsyncSession = Depends(get_async_session)):
     if DEBUG:
         logger.debug("Analysis endpoint called")
     
-    latest_metrics = get_latest_metrics()
+    latest_metrics = await get_latest_metrics_from_db(session)
     if latest_metrics is None:
         if DEBUG:
             logger.debug("No metrics available for analysis")

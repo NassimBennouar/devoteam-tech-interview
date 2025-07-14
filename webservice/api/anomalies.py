@@ -1,7 +1,9 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from webservice.services.anomaly_detection import AnomalyDetectionService
 from webservice.models.anomaly import AnomalyResult
-from webservice.api.metrics import get_latest_metrics
+from webservice.api.metrics import get_latest_metrics_from_db
+from webservice.db import get_async_session
+from sqlalchemy.ext.asyncio import AsyncSession
 import logging
 import os
 
@@ -12,11 +14,11 @@ DEBUG = os.getenv("DEBUG", "false").lower() == "true"
 
 
 @router.get("/anomalies", response_model=AnomalyResult)
-async def get_anomalies():
+async def get_anomalies(session: AsyncSession = Depends(get_async_session)):
     if DEBUG:
         logger.debug("Anomalies endpoint called")
     
-    latest_metrics = get_latest_metrics()
+    latest_metrics = await get_latest_metrics_from_db(session)
     if latest_metrics is None:
         if DEBUG:
             logger.debug("No metrics available for anomaly detection")

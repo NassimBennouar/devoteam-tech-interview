@@ -4,26 +4,25 @@ import json
 
 def display_anomalies(anomalies_data):
     """Display anomalies in a structured format"""
-    st.subheader("🚨 Anomalies détectées")
+    st.subheader("🚨 Detected Anomalies")
     
     if not anomalies_data.get("has_anomalies", False):
-        st.success("✅ Aucune anomalie détectée")
+        st.success("✅ No anomalies detected")
         return
     
     anomalies = anomalies_data.get("anomalies", [])
     
-    # Summary metrics
     col1, col2, col3 = st.columns(3)
     with col1:
         st.metric("Total anomalies", anomalies_data.get("total_count", 0))
     with col2:
         critical_count = len([a for a in anomalies if a.get("severity", 0) >= 4])
-        st.metric("Critiques", critical_count)
+        st.metric("Critical", critical_count)
     with col3:
         warning_count = len([a for a in anomalies if a.get("severity", 0) == 3])
         st.metric("Warnings", warning_count)
     
-    st.write(f"**Résumé:** {anomalies_data.get('summary', 'N/A')}")
+    st.write(f"**Summary:** {anomalies_data.get('summary', 'N/A')}")
     
     for i, anomaly in enumerate(anomalies, 1):
         severity = anomaly.get("severity", 0)
@@ -46,40 +45,40 @@ def display_anomalies(anomalies_data):
             st.write(f"**Type:** {anomaly_type}")
             st.write(f"**Message:** {message}")
             if anomaly.get("threshold"):
-                st.write(f"**Seuil:** {anomaly['threshold']}")
+                st.write(f"**Threshold:** {anomaly['threshold']}")
 
 def display_analysis_results(analysis_data):
     """Display LLM analysis results"""
-    st.subheader("🧠 Résultats de l'analyse LLM")
+    st.subheader("🧠 LLM Analysis Results")
     
     metadata = analysis_data.get("analysis_metadata", {})
     col1, col2, col3 = st.columns(3)
     
     with col1:
         confidence = analysis_data.get("confidence_score", 0)
-        st.metric("Confiance", f"{confidence:.2f}")
+        st.metric("Confidence", f"{confidence:.2f}")
     
     with col2:
         anomaly_count = metadata.get("anomaly_count", 0)
-        st.metric("Anomalies analysées", anomaly_count)
+        st.metric("Analyzed Anomalies", anomaly_count)
     
     with col3:
         response_time = metadata.get("response_time", 0)
-        st.metric("Temps de réponse", f"{response_time:.1f}s")
+        st.metric("Response Time", f"{response_time:.1f}s")
     
-    st.subheader("📝 Résumé de l'analyse")
-    summary = analysis_data.get("analysis_summary", "Aucun résumé disponible")
+    st.subheader("📝 Analysis Summary")
+    summary = analysis_data.get("analysis_summary", "No summary available")
     st.info(summary)
     
-    st.subheader("🔍 Analyse des causes racines")
-    root_cause = analysis_data.get("root_cause_analysis", "Aucune analyse des causes disponible")
+    st.subheader("🔍 Root Cause Analysis")
+    root_cause = analysis_data.get("root_cause_analysis", "No root cause analysis available")
     st.write(root_cause)
     
-    st.subheader("💡 Recommandations")
+    st.subheader("💡 Recommendations")
     recommendations = analysis_data.get("recommendations", [])
     
     if not recommendations:
-        st.warning("Aucune recommandation disponible")
+        st.warning("No recommendations available")
         return
     
     for i, rec in enumerate(recommendations, 1):
@@ -97,25 +96,25 @@ def display_analysis_results(analysis_data):
         else:
             priority_color = "🟢"
         
-        with st.expander(f"{priority_color} {i}. {action} (Priorité {priority})"):
+        with st.expander(f"{priority_color} {i}. {action} (Priority {priority})"):
             col1, col2 = st.columns(2)
             with col1:
-                st.write(f"**Catégorie:** {category}")
+                st.write(f"**Category:** {category}")
                 st.write(f"**Effort:** {effort}")
             with col2:
-                st.write(f"**Impact attendu:** {impact}")
+                st.write(f"**Expected Impact:** {impact}")
             
             if technical_details:
-                st.write(f"**Détails techniques:** {technical_details}")
+                st.write(f"**Technical Details:** {technical_details}")
 
 def display_json_preview(json_data):
     """Display JSON data in a formatted way"""
-    st.subheader("👀 Aperçu du JSON")
+    st.subheader("👀 JSON Preview")
     
     try:
         formatted_json = json.dumps(json_data, indent=2, ensure_ascii=False)
         st.code(formatted_json, language="json", height=300)
         return True
     except Exception as e:
-        st.error(f"Erreur lors du formatage JSON: {e}")
+        st.error(f"Error formatting JSON: {e}")
         return False 

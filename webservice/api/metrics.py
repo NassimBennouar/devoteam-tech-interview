@@ -22,6 +22,40 @@ DEBUG = os.getenv("DEBUG", "false").lower() == "true"
 
 latest_metrics = None
 
+async def get_latest_metrics_from_db(session: AsyncSession):
+    try:
+        result = await session.execute(
+            select(Metrics).order_by(desc(Metrics.timestamp)).limit(1)
+        )
+        metric = result.scalar_one_or_none()
+        
+        if metric:
+            return {
+                "timestamp": metric.timestamp,
+                "cpu_usage": metric.cpu_usage,
+                "memory_usage": metric.memory_usage,
+                "latency_ms": metric.latency_ms,
+                "disk_usage": metric.disk_usage,
+                "network_in_kbps": metric.network_in_kbps,
+                "network_out_kbps": metric.network_out_kbps,
+                "io_wait": metric.io_wait,
+                "thread_count": metric.thread_count,
+                "active_connections": metric.active_connections,
+                "error_rate": metric.error_rate,
+                "uptime_seconds": metric.uptime_seconds,
+                "temperature_celsius": metric.temperature_celsius,
+                "power_consumption_watts": metric.power_consumption_watts,
+                "service_status": {
+                    "database": metric.service_status_database,
+                    "api_gateway": metric.service_status_api_gateway,
+                    "cache": metric.service_status_cache
+                }
+            }
+        return None
+    except Exception as e:
+        logger.error(f"Error getting latest metrics from DB: {str(e)}")
+        return None
+
 def get_latest_metrics():
     return latest_metrics
 
