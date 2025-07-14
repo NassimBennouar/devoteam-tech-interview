@@ -1,9 +1,10 @@
 from typing import Dict, Any, List
 import logging
-from collections import deque
+from collections import deque, defaultdict
 from webservice.models.anomaly import Anomaly, AnomalyResult, AnomalyType
 import statistics
 import os
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 DEBUG = os.getenv("DEBUG", "false").lower() == "true"
@@ -82,6 +83,126 @@ class AnomalyDetectionService:
             summary=summary,
             total_count=total_count
         )
+
+    def analyze_historical_anomalies(self, metrics_list: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Analyze anomalies on a list of historical metrics"""
+        analyzed_timeline = []
+        
+        if DEBUG:
+            logger.debug(f"Starting historical anomaly analysis on {len(metrics_list)} points")
+        
+        for metrics in metrics_list:
+            anomaly_result = self.detect_anomalies(metrics)
+            analyzed_timeline.append({
+                "timestamp": metrics.get("timestamp"),
+                "anomalies": [anomaly.model_dump() for anomaly in anomaly_result.anomalies],
+                "has_issues": anomaly_result.has_anomalies,
+                "total_count": anomaly_result.total_count
+            })
+        
+        if DEBUG:
+            total_anomalies = sum(point["total_count"] for point in analyzed_timeline)
+            logger.debug(f"Historical analysis completed: {total_anomalies} total anomalies across {len(metrics_list)} points")
+        
+        return analyzed_timeline
+
+    def analyze_anomaly_patterns(self, analyzed_timeline: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Analyze patterns in detected anomalies"""
+        if DEBUG:
+            logger.debug("Starting pattern analysis")
+        
+        frequency = self._analyze_frequency(analyzed_timeline)
+        temporal = self._analyze_temporal_patterns(analyzed_timeline)
+        cooccurrence = self._analyze_cooccurrence(analyzed_timeline)
+        
+        patterns = {
+            "frequency": frequency,
+            "temporal": temporal,
+            "cooccurrence": cooccurrence,
+            "total_points": len(analyzed_timeline)
+        }
+        
+        if DEBUG:
+            logger.debug(f"Pattern analysis completed: {len(frequency)} metrics analyzed")
+        
+        return patterns
+
+    def _analyze_frequency(self, analyzed_timeline: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Analyze frequency of anomalies per metric"""
+        frequency = {}
+        severity_distribution = defaultdict(list)
+        
+        for point in analyzed_timeline:
+            for anomaly in point["anomalies"]:
+                metric = anomaly["metric"]
+                severity = anomaly["severity"]
+                
+                frequency[metric] = frequency.get(metric, 0) + 1
+                severity_distribution[metric].append(severity)
+        
+        severity_avg = {}
+        for metric, severities in severity_distribution.items():
+            severity_avg[metric] = sum(severities) / len(severities)
+        
+        return {
+            "counts": frequency,
+            "severity_avg": severity_avg,
+            "most_frequent": max(frequency.items(), key=lambda x: x[1]) if frequency else None
+        }
+
+    def _analyze_temporal_patterns(self, analyzed_timeline: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Analyze temporal patterns in anomalies"""
+        hourly_anomalies = defaultdict(list)
+        
+        for point in analyzed_timeline:
+            if point["timestamp"]:
+                try:
+                    if isinstance(point["timestamp"], str):
+                        dt = datetime.fromisoformat(point["timestamp"].replace('Z', '+00:00'))
+                    else:
+                        dt = point["timestamp"]
+                    
+                    hour = dt.hour
+                    anomaly_count = point["total_count"]
+                    hourly_anomalies[hour].append(anomaly_count)
+                except Exception as e:
+                    if DEBUG:
+                        logger.debug(f"Error parsing timestamp {point['timestamp']}: {e}")
+                    continue
+        
+        hourly_avg = {}
+        for hour, counts in hourly_anomalies.items():
+            hourly_avg[hour] = sum(counts) / len(counts)
+        
+        overall_avg = sum(hourly_avg.values()) / len(hourly_avg) if hourly_avg else 0
+        problematic_hours = [hour for hour, avg in hourly_avg.items() if avg > overall_avg * 1.5]
+        
+        return {
+            "hourly_distribution": dict(hourly_avg),
+            "problematic_hours": sorted(problematic_hours),
+            "peak_hour": max(hourly_avg.items(), key=lambda x: x[1]) if hourly_avg else None
+        }
+
+    def _analyze_cooccurrence(self, analyzed_timeline: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Analyze co-occurrence of anomalies"""
+        cooccurrences = defaultdict(int)
+        
+        for point in analyzed_timeline:
+            metrics_in_alert = [anomaly["metric"] for anomaly in point["anomalies"]]
+            
+            for i, metric1 in enumerate(metrics_in_alert):
+                for metric2 in metrics_in_alert[i+1:]:
+                    pair = tuple(sorted([metric1, metric2]))
+                    cooccurrences[pair] += 1
+        
+        cooccurrence_dict = dict(cooccurrences)
+        sorted_cooccurrences = sorted(cooccurrence_dict.items(), key=lambda x: x[1], reverse=True)
+        
+        return {
+            "pairs": cooccurrence_dict,
+            "most_common": sorted_cooccurrences[:5],
+            "total_pairs": len(cooccurrence_dict)
+        }
 
     def _check_absolute_threshold(self, metric: str, value: Any) -> Anomaly:
         thresholds = self.absolute_thresholds[metric]
