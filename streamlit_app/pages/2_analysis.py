@@ -3,6 +3,11 @@ from components.api_client import APIClient
 from components.display import display_anomalies, display_analysis_results
 
 st.set_page_config(page_title="Analysis", page_icon="🔍")
+
+if not st.session_state.get("authenticated", False):
+    st.error("Please login first.")
+    st.stop()
+
 st.title("LLM Analysis")
 
 if not st.session_state.get('metrics_ingested', False):

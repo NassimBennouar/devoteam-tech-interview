@@ -4,6 +4,11 @@ from components.api_client import APIClient
 from components.display import display_json_preview
 
 st.set_page_config(page_title="Ingestion", page_icon="📥")
+
+if not st.session_state.get("authenticated", False):
+    st.error("Please login first.")
+    st.stop()
+
 st.title("Ingestion")
 
 uploaded_file = st.file_uploader(
