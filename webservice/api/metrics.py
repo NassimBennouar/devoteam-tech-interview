@@ -43,7 +43,7 @@ async def ingest_metrics(request: Request):
             logger.warning(f"Validation failed with {len(result.errors)} errors")
             if DEBUG:
                 for error in result.errors:
-                    logger.debug(f"Validation error: {error.field} - {error.message}")
+                    logger.error(f"Validation error | field: {error.field} | value: {error.value} | message: {error.message}")
             return JSONResponse(
                 status_code=422,
                 content={
