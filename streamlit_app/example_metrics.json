@@ -1,0 +1,21 @@
+{
+  "timestamp": "2023-10-01T12:00:00Z",
+  "cpu_usage": 95,
+  "memory_usage": 90,
+  "latency_ms": 600,
+  "disk_usage": 95,
+  "network_in_kbps": 1000,
+  "network_out_kbps": 800,
+  "io_wait": 15,
+  "thread_count": 100,
+  "active_connections": 200,
+  "error_rate": 0.08,
+  "uptime_seconds": 1800,
+  "temperature_celsius": 85,
+  "power_consumption_watts": 450,
+  "service_status": {
+    "database": "offline",
+    "api_gateway": "degraded",
+    "cache": "online"
+  }
+} 
