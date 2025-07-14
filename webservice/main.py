@@ -7,6 +7,7 @@ from contextlib import asynccontextmanager
 
 from webservice.api.health import router as health_router
 from webservice.api.metrics import router as metrics_router
+from webservice.api.anomalies import router as anomalies_router
 
 DEBUG = os.getenv("DEBUG", "false").lower() == "true"
 
@@ -41,6 +42,7 @@ app.add_middleware(
 
 app.include_router(health_router, prefix="/api", tags=["health"])
 app.include_router(metrics_router, prefix="/api", tags=["metrics"])
+app.include_router(anomalies_router, prefix="/api", tags=["anomalies"])
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000) 

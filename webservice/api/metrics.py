@@ -14,6 +14,13 @@ DEBUG = os.getenv("DEBUG", "false").lower() == "true"
 
 latest_metrics = None
 
+def get_latest_metrics():
+    return latest_metrics
+
+def set_latest_metrics(metrics):
+    global latest_metrics
+    latest_metrics = metrics
+
 @router.post("/ingest", status_code=200)
 async def ingest_metrics(request: Request):
     start_time = time.time()
@@ -45,8 +52,7 @@ async def ingest_metrics(request: Request):
                 }
             )
         
-        global latest_metrics
-        latest_metrics = result.data
+        set_latest_metrics(result.data)
         
         total_time = time.time() - start_time
         logger.info(f"Metrics ingestion successful in {total_time:.3f}s")
