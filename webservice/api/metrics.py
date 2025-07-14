@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status, Request, Depends
+from fastapi import APIRouter, status, Request, Depends, Query
 from fastapi.responses import JSONResponse
 from webservice.services.validation import ValidationService
 from webservice.services.persistence import PersistenceService
@@ -9,9 +9,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 import logging
 import time
 import os
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from sqlalchemy.future import select
-from sqlalchemy import func
+from sqlalchemy import func, desc
 from webservice.models.sql import Metrics
 
 router = APIRouter()
@@ -28,6 +28,72 @@ def get_latest_metrics():
 def set_latest_metrics(metrics):
     global latest_metrics
     latest_metrics = metrics
+
+@router.get("/history")
+async def get_history(
+    limit: Optional[int] = Query(100, description="Number of points to retrieve", ge=1, le=1000),
+    start_time: Optional[str] = Query(None, description="Start time filter (ISO format)"),
+    end_time: Optional[str] = Query(None, description="End time filter (ISO format)"),
+    session: AsyncSession = Depends(get_async_session)
+):
+    try:
+        query = select(Metrics).order_by(desc(Metrics.timestamp))
+        
+        if start_time:
+            query = query.where(Metrics.timestamp >= start_time)
+        if end_time:
+            query = query.where(Metrics.timestamp <= end_time)
+        
+        query = query.limit(limit)
+        
+        result = await session.execute(query)
+        metrics = result.scalars().all()
+        
+        history_data = []
+        for metric in metrics:
+            history_data.append({
+                "id": metric.id,
+                "timestamp": metric.timestamp,
+                "cpu_usage": metric.cpu_usage,
+                "memory_usage": metric.memory_usage,
+                "latency_ms": metric.latency_ms,
+                "disk_usage": metric.disk_usage,
+                "network_in_kbps": metric.network_in_kbps,
+                "network_out_kbps": metric.network_out_kbps,
+                "io_wait": metric.io_wait,
+                "thread_count": metric.thread_count,
+                "active_connections": metric.active_connections,
+                "error_rate": metric.error_rate,
+                "uptime_seconds": metric.uptime_seconds,
+                "temperature_celsius": metric.temperature_celsius,
+                "power_consumption_watts": metric.power_consumption_watts,
+                "service_status": {
+                    "database": metric.service_status_database,
+                    "api_gateway": metric.service_status_api_gateway,
+                    "cache": metric.service_status_cache
+                },
+                "created_at": metric.created_at.isoformat() if metric.created_at else None
+            })
+        
+        logger.info(f"Retrieved {len(history_data)} metrics from history")
+        
+        return {
+            "total_retrieved": len(history_data),
+            "limit": limit,
+            "start_time": start_time,
+            "end_time": end_time,
+            "data": history_data
+        }
+        
+    except Exception as e:
+        logger.error(f"Error retrieving history: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content={
+                "status": "error",
+                "message": "Failed to retrieve history"
+            }
+        )
 
 @router.get("/metrics/info")
 async def get_metrics_info(session: AsyncSession = Depends(get_async_session)):
