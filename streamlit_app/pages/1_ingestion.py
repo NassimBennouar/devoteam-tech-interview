@@ -18,24 +18,19 @@ if uploaded_file is not None:
         json_data = json.loads(file_content.decode('utf-8'))
         with st.expander("Show JSON preview"):
             st.code(json.dumps(json_data, indent=2), language="json", height=300)
-        col1, col2 = st.columns([1, 3])
-        with col1:
-            if st.button("Send to API", type="primary"):
-                with st.spinner("Sending..."):
-                    client = APIClient()
-                    result = client.ingest_metrics(json_data)
-                    if result["success"]:
-                        st.success("Metrics successfully sent!")
-                        st.session_state.metrics_ingested = True
-                        if "data" in result:
-                            st.subheader("Confirmed data from API")
-                            with st.expander("Show ingested data"):
-                                st.json(result["data"])
-                    else:
-                        st.error(f"Error: {result['error']}")
-        with col2:
-            if st.button("Upload another file"):
-                st.rerun()
+        if st.button("Send to API", type="primary"):
+            with st.spinner("Sending..."):
+                client = APIClient()
+                result = client.ingest_metrics(json_data)
+                if result["success"]:
+                    st.success("Metrics successfully sent!")
+                    st.session_state.metrics_ingested = True
+                    if "data" in result:
+                        st.subheader("Confirmed data from API")
+                        with st.expander("Show ingested data"):
+                            st.json(result["data"])
+                else:
+                    st.error(f"Error: {result['error']}")
     except json.JSONDecodeError as e:
         st.error(f"JSON format error: {e}")
     except Exception as e:
@@ -65,12 +60,6 @@ else:
     }
     st.code(json.dumps(example_json, indent=2), language="json")
     example_json_str = json.dumps(example_json, indent=2)
-    st.download_button(
-        label="Download example JSON",
-        data=example_json_str,
-        file_name="example_metrics.json",
-        mime="application/json"
-    )
 if st.session_state.get('metrics_ingested', False):
     st.success("Metrics have been ingested in this session. You can go to the Analysis page.")
 else:
