@@ -2,17 +2,25 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import logging
+import os
 from contextlib import asynccontextmanager
 
 from webservice.api.health import router as health_router
 from webservice.api.metrics import router as metrics_router
 
-logging.basicConfig(level=logging.INFO)
+DEBUG = os.getenv("DEBUG", "false").lower() == "true"
+
+logging.basicConfig(
+    level=logging.DEBUG if DEBUG else logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Infrastructure Monitoring API starting up...")
+    if DEBUG:
+        logger.debug("Debug mode enabled")
     yield
     logger.info("Infrastructure Monitoring API shutting down...")
 
