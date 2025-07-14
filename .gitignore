@@ -20,3 +20,5 @@ __MACOSX
 
 *.png
 internal_*.md
+
+*.db
