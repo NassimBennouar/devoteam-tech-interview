@@ -10,6 +10,9 @@ import logging
 import time
 import os
 from typing import List, Dict, Any
+from sqlalchemy.future import select
+from sqlalchemy import func
+from webservice.models.sql import Metrics
 
 router = APIRouter()
 validation_service = ValidationService()
@@ -25,6 +28,31 @@ def get_latest_metrics():
 def set_latest_metrics(metrics):
     global latest_metrics
     latest_metrics = metrics
+
+@router.get("/metrics/info")
+async def get_metrics_info(session: AsyncSession = Depends(get_async_session)):
+    try:
+        result = await session.execute(
+            select(
+                func.count(Metrics.id).label("total_count"),
+                func.max(Metrics.timestamp).label("latest_timestamp")
+            )
+        )
+        row = result.first()
+        
+        return {
+            "total_count": row.total_count or 0,
+            "latest_timestamp": row.latest_timestamp
+        }
+    except Exception as e:
+        logger.error(f"Error getting metrics info: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content={
+                "status": "error",
+                "message": "Failed to get metrics info"
+            }
+        )
 
 @router.post("/ingest", status_code=200)
 async def ingest_metrics(request: Request, session: AsyncSession = Depends(get_async_session)):

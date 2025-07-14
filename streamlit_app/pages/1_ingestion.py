@@ -11,11 +11,29 @@ if not st.session_state.get("authenticated", False):
 
 st.title("Ingestion")
 
-uploaded_file = st.file_uploader(
-    "Upload a JSON file with infrastructure metrics",
-    type=['json'],
-    help="The file must contain all required metrics in JSON format"
-)
+client = APIClient()
+
+col1, col2 = st.columns(2)
+with col1:
+    st.subheader("📊 Current Metrics Status")
+    metrics_info = client.get_metrics_info()
+    if metrics_info["success"]:
+        data = metrics_info["data"]
+        st.metric("Total Points", data["total_count"])
+        if data["latest_timestamp"]:
+            st.metric("Latest Point", data["latest_timestamp"])
+        else:
+            st.metric("Latest Point", "None")
+    else:
+        st.error(f"Error loading metrics info: {metrics_info['error']}")
+
+with col2:
+    st.subheader("📤 Upload New Metrics")
+    uploaded_file = st.file_uploader(
+        "Upload a JSON file with infrastructure metrics",
+        type=['json'],
+        help="The file must contain all required metrics in JSON format"
+    )
 
 if uploaded_file is not None:
     try:
@@ -25,15 +43,10 @@ if uploaded_file is not None:
             st.code(json.dumps(json_data, indent=2), language="json", height=300)
         if st.button("Send to API", type="primary"):
             with st.spinner("Sending..."):
-                client = APIClient()
                 result = client.ingest_metrics(json_data)
                 if result["success"]:
                     st.success("Metrics successfully sent!")
-                    st.session_state.metrics_ingested = True
-                    if "data" in result:
-                        st.subheader("Confirmed data from API")
-                        with st.expander("Show ingested data"):
-                            st.json(result["data"])
+                    st.rerun()
                 else:
                     st.error(f"Error: {result['error']}")
     except json.JSONDecodeError as e:
@@ -63,9 +76,4 @@ else:
             "cache": "online"
         }
     }
-    st.code(json.dumps(example_json, indent=2), language="json")
-    example_json_str = json.dumps(example_json, indent=2)
-if st.session_state.get('metrics_ingested', False):
-    st.success("Metrics have been ingested in this session. You can go to the Analysis page.")
-else:
-    st.info("No metrics ingested in this session.") 
+    st.code(json.dumps(example_json, indent=2), language="json") 
