@@ -27,6 +27,19 @@ class AnalysisResult(BaseModel):
     analysis_metadata: Dict[str, Any] = Field(default={}, description="Analysis metadata")
 
 
+class HistoricalAnalysisMetadata(BaseModel):
+    response_time: float
+    analysis_type: str
+    total_points: int
+    pattern_interpretation: Dict[str, Any]
+    severity_assessment: Dict[str, Any]
+    timestamp: str
+
+
+class HistoricalAnalysisResult(AnalysisResult):
+    analysis_metadata: HistoricalAnalysisMetadata
+
+
 class LLMAnalysisMetrics(BaseModel):
     total_tokens: int = Field(..., description="Total tokens used")
     prompt_tokens: int = Field(..., description="Tokens used in prompt")

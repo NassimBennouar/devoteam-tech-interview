@@ -1,16 +1,18 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Query
 from webservice.services.llm_analysis import LLMAnalysisService
 from webservice.services.anomaly_detection import AnomalyDetectionService
+from webservice.services.metrics_service import MetricsService
 from webservice.models.analysis import AnalysisResult
-from webservice.api.metrics import get_latest_metrics_from_db
 from webservice.db import get_async_session
 from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Optional
 import logging
 import os
 
 router = APIRouter()
 llm_service = LLMAnalysisService()
 anomaly_service = AnomalyDetectionService()
+metrics_service = MetricsService()
 logger = logging.getLogger(__name__)
 DEBUG = os.getenv("DEBUG", "false").lower() == "true"
 
@@ -20,7 +22,7 @@ async def get_analysis(session: AsyncSession = Depends(get_async_session)):
     if DEBUG:
         logger.debug("Analysis endpoint called")
     
-    latest_metrics = await get_latest_metrics_from_db(session)
+    latest_metrics = await metrics_service.get_latest_metrics(session)
     if latest_metrics is None:
         if DEBUG:
             logger.debug("No metrics available for analysis")
@@ -62,6 +64,49 @@ async def get_analysis(session: AsyncSession = Depends(get_async_session)):
         raise HTTPException(
             status_code=500,
             detail=f"Analysis failed: {str(e)}"
+        )
+
+
+@router.get("/analysis/historical", response_model=AnalysisResult)
+async def get_historical_analysis(
+    points: Optional[int] = Query(50, description="Number of historical points to analyze", ge=10, le=200),
+    session: AsyncSession = Depends(get_async_session)
+):
+    if DEBUG:
+        logger.debug(f"Historical analysis endpoint called with {points} points")
+    
+    try:
+        historical_metrics = await metrics_service.get_historical_metrics(session, points)
+        
+        if len(historical_metrics) < 10:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Insufficient historical data. Need at least 10 points, found {len(historical_metrics)}. Please ingest more metrics first."
+            )
+        
+        logger.info(f"Starting historical analysis with {len(historical_metrics)} points")
+        
+        analysis_result = llm_service.analyze_historical_data(historical_metrics, anomaly_service)
+        
+        logger.info(f"Historical analysis completed with {len(analysis_result.recommendations)} recommendations")
+        
+        if DEBUG:
+            logger.debug(f"Historical analysis confidence: {analysis_result.confidence_score}")
+            logger.debug(f"Analysis metadata: {analysis_result.analysis_metadata}")
+            for rec in analysis_result.recommendations:
+                logger.debug(f"Historical recommendation: {rec.priority} - {rec.action}")
+        
+        return analysis_result
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error during historical analysis: {str(e)}")
+        if DEBUG:
+            logger.debug("Full error details:", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Historical analysis failed: {str(e)}"
         )
 
 
