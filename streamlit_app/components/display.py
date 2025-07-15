@@ -167,6 +167,34 @@ def display_historical_analysis_results(analysis_data):
             escalation_risk = severity_assessment.get("escalation_risk", "N/A")
             st.metric("Escalation Risk", escalation_risk.title())
     
+    anomaly_breakdown = metadata.get("anomaly_breakdown", {})
+    if anomaly_breakdown:
+        st.subheader("📊 Historical Anomaly Breakdown")
+        
+        breakdown_data = []
+        for metric, data in anomaly_breakdown.items():
+            warnings = data.get("warnings", 0)
+            critical = data.get("critical", 0)
+            total = data.get("total", 0)
+            avg_threshold = data.get("avg_threshold")
+            
+            threshold_display = f"{avg_threshold:.1f}" if avg_threshold else "N/A"
+            
+            breakdown_data.append({
+                "Metric": metric,
+                "Warnings": warnings,
+                "Critical": critical,
+                "Total": total,
+                "Avg Threshold": threshold_display
+            })
+    
+        breakdown_data.sort(key=lambda x: x["Total"], reverse=True)
+        
+        if breakdown_data:
+            st.table(breakdown_data)
+        else:
+            st.info("No anomaly breakdown data available")
+    
     st.subheader("💡 Recommendations")
     recommendations = analysis_data.get("recommendations", [])
     

@@ -5,6 +5,7 @@ from webservice.models.anomaly import Anomaly, AnomalyResult, AnomalyType
 import statistics
 import os
 from datetime import datetime
+import re
 
 logger = logging.getLogger(__name__)
 DEBUG = os.getenv("DEBUG", "false").lower() == "true"
@@ -114,11 +115,13 @@ class AnomalyDetectionService:
         frequency = self._analyze_frequency(analyzed_timeline)
         temporal = self._analyze_temporal_patterns(analyzed_timeline)
         cooccurrence = self._analyze_cooccurrence(analyzed_timeline)
+        breakdown = self._analyze_anomaly_breakdown(analyzed_timeline)
         
         patterns = {
             "frequency": frequency,
             "temporal": temporal,
             "cooccurrence": cooccurrence,
+            "breakdown": breakdown,
             "total_points": len(analyzed_timeline)
         }
         
@@ -203,6 +206,56 @@ class AnomalyDetectionService:
             "most_common": sorted_cooccurrences[:5],
             "total_pairs": len(cooccurrence_dict)
         }
+
+    def _analyze_anomaly_breakdown(self, analyzed_timeline: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Analyze anomaly breakdown by severity level for each metric"""
+        breakdown = {}
+        
+        for point in analyzed_timeline:
+            for anomaly in point["anomalies"]:
+                metric = anomaly["metric"]
+                severity = anomaly["severity"]
+                threshold = anomaly.get("threshold", "unknown")
+                
+                if metric not in breakdown:
+                    breakdown[metric] = {
+                        "warnings": 0,
+                        "critical": 0,
+                        "total": 0,
+                        "thresholds": []
+                    }
+                
+                if severity >= 4:
+                    breakdown[metric]["critical"] += 1
+                elif severity == 3:
+                    breakdown[metric]["warnings"] += 1
+                
+                breakdown[metric]["total"] += 1
+                breakdown[metric]["thresholds"].append(threshold)
+        
+        # Calculate average threshold for each metric
+        for metric, data in breakdown.items():
+            if data["thresholds"]:
+                # Extract numeric values from threshold strings
+                numeric_thresholds = []
+                for threshold in data["thresholds"]:
+                    if isinstance(threshold, (int, float)):
+                        numeric_thresholds.append(threshold)
+                    elif isinstance(threshold, str):
+                        # Try to extract numbers from strings like "80", "2.0x avg (45.2)"
+                        numbers = re.findall(r'\d+\.?\d*', threshold)
+                        if numbers:
+                            numeric_thresholds.append(float(numbers[0]))
+                
+                if numeric_thresholds:
+                    data["avg_threshold"] = sum(numeric_thresholds) / len(numeric_thresholds)
+                else:
+                    data["avg_threshold"] = None
+            
+            # Remove the raw thresholds list to keep response clean
+            del data["thresholds"]
+        
+        return breakdown
 
     def _check_absolute_threshold(self, metric: str, value: Any) -> Anomaly:
         thresholds = self.absolute_thresholds[metric]

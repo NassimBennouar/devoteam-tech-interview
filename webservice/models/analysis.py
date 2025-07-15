@@ -33,6 +33,7 @@ class HistoricalAnalysisMetadata(BaseModel):
     total_points: int
     pattern_interpretation: Dict[str, Any]
     severity_assessment: Dict[str, Any]
+    analysis_breakdown: Any
     timestamp: str
 
 

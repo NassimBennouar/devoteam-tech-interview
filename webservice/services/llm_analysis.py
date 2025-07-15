@@ -187,6 +187,7 @@ Provide comprehensive recommendations based on this analysis.""")
                 "total_points": patterns["total_points"],
                 "pattern_interpretation": parallel_results["pattern_interpretation"],
                 "severity_assessment": parallel_results["severity_assessment"],
+                "anomaly_breakdown": patterns.get("breakdown", {}),
                 "timestamp": datetime.now().isoformat()
             }
             
