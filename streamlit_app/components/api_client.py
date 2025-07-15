@@ -127,4 +127,26 @@ class APIClient:
         except requests.exceptions.ConnectionError:
             return {"success": False, "error": "Cannot connect to API server"}
         except Exception as e:
+            return {"success": False, "error": f"Request failed: {str(e)}"}
+
+    def get_historical_analysis(self, points=50):
+        """Get historical LLM analysis from FastAPI"""
+        try:
+            response = requests.get(f"{self.base_url}/analysis/historical", params={"points": points})
+            
+            if response.status_code == 200:
+                return {"success": True, "data": response.json()}
+            else:
+                error_detail = "Unknown error"
+                try:
+                    error_data = response.json()
+                    error_detail = error_data.get("detail", f"HTTP {response.status_code}")
+                except:
+                    error_detail = f"HTTP {response.status_code}: {response.text}"
+                
+                return {"success": False, "error": error_detail}
+                
+        except requests.exceptions.ConnectionError:
+            return {"success": False, "error": "Cannot connect to API server"}
+        except Exception as e:
             return {"success": False, "error": f"Request failed: {str(e)}"} 

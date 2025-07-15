@@ -107,6 +107,99 @@ def display_analysis_results(analysis_data):
             if technical_details:
                 st.write(f"**Technical Details:** {technical_details}")
 
+def display_historical_analysis_results(analysis_data):
+    """Display historical LLM analysis results with pattern insights"""
+    st.subheader("🧠 Historical Analysis Results")
+    
+    metadata = analysis_data.get("analysis_metadata", {})
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        confidence = analysis_data.get("confidence_score", 0)
+        st.metric("Confidence", f"{confidence:.2f}")
+    
+    with col2:
+        total_points = metadata.get("total_points", 0)
+        st.metric("Points Analyzed", total_points)
+    
+    with col3:
+        response_time = metadata.get("response_time", 0)
+        st.metric("Response Time", f"{response_time:.1f}s")
+    
+    with col4:
+        analysis_type = metadata.get("analysis_type", "unknown")
+        st.metric("Analysis Type", analysis_type.title())
+    
+    st.subheader("📝 Analysis Summary")
+    summary = analysis_data.get("analysis_summary", "No summary available")
+    st.info(summary)
+    
+    st.subheader("🔍 Root Cause Analysis")
+    root_cause = analysis_data.get("root_cause_analysis", "No root cause analysis available")
+    st.write(root_cause)
+    
+    pattern_interpretation = metadata.get("pattern_interpretation", {})
+    severity_assessment = metadata.get("severity_assessment", {})
+    
+    if pattern_interpretation:
+        st.subheader("📊 Pattern Interpretation")
+        col1, col2 = st.columns(2)
+        with col1:
+            st.write(f"**Main Pattern:** {pattern_interpretation.get('main_pattern', 'N/A')}")
+            st.write(f"**Pattern Type:** {pattern_interpretation.get('pattern_type', 'N/A')}")
+        with col2:
+            st.write(f"**Probable Cause:** {pattern_interpretation.get('probable_cause', 'N/A')}")
+            st.write(f"**Priority Metric:** {pattern_interpretation.get('priority_metric', 'N/A')}")
+    
+    if severity_assessment:
+        st.subheader("⚠️ Severity Assessment")
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            criticality = severity_assessment.get("criticality", 0)
+            st.metric("Criticality", f"{criticality}/5")
+        with col2:
+            urgency = severity_assessment.get("urgency", "N/A")
+            st.metric("Urgency", urgency.title())
+        with col3:
+            business_impact = severity_assessment.get("business_impact", "N/A")
+            st.metric("Business Impact", business_impact.title())
+        with col4:
+            escalation_risk = severity_assessment.get("escalation_risk", "N/A")
+            st.metric("Escalation Risk", escalation_risk.title())
+    
+    st.subheader("💡 Recommendations")
+    recommendations = analysis_data.get("recommendations", [])
+    
+    if not recommendations:
+        st.warning("No recommendations available")
+        return
+    
+    for i, rec in enumerate(recommendations, 1):
+        priority = rec.get("priority", 5)
+        category = rec.get("category", "unknown")
+        action = rec.get("action", "No action specified")
+        impact = rec.get("impact", "No impact specified")
+        effort = rec.get("effort", "unknown")
+        technical_details = rec.get("technical_details")
+        
+        if priority <= 2:
+            priority_color = "🔴"
+        elif priority <= 3:
+            priority_color = "🟡"
+        else:
+            priority_color = "🟢"
+        
+        with st.expander(f"{priority_color} {i}. {action} (Priority {priority})"):
+            col1, col2 = st.columns(2)
+            with col1:
+                st.write(f"**Category:** {category}")
+                st.write(f"**Effort:** {effort}")
+            with col2:
+                st.write(f"**Expected Impact:** {impact}")
+            
+            if technical_details:
+                st.write(f"**Technical Details:** {technical_details}")
+
 def display_json_preview(json_data):
     """Display JSON data in a formatted way"""
     st.subheader("👀 JSON Preview")
