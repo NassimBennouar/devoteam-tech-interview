@@ -12,21 +12,28 @@ cd streamlit_app/
 uv run streamlit run main.py --server.port 8501
 ```
 
-The interface will be available at: `http://localhost:8501`
+Access: `http://localhost:8501`
 
 ## 📋 Features
 
 ### 📥 Ingestion Page
-- **Upload JSON**: Select a `.json` file with metrics
-- **Preview**: Visualize the JSON before sending
-- **Validation**: Send to FastAPI for formal validation
-- **Example**: Download a sample JSON file
+- **Single metrics**: Upload one JSON file with current infrastructure metrics
+- **Batch metrics**: Upload multiple data points for historical analysis
+- Preview before sending
+- API validation
+- Example file download
 
 ### 🔍 Analysis Page
-- **Anomaly detection**: Calls `/api/anomalies`
-- **LLM analysis**: Calls `/api/analysis`
-- **Structured results**: Displays recommendations
-- **Error handling**: Clear error messages
+- **Latest Point Analysis**: Real-time anomaly detection and LLM analysis of current metrics
+- **Historical Analysis**: Pattern analysis across multiple data points with configurable history depth
+- Toggle between analysis modes
+- Collapsible anomaly breakdown display
+- Structured recommendations with priority levels
+
+### 📊 Dashboards
+- **Anomaly Summary**: Warning/critical counts per metric
+- **Recommendations Table**: Prioritized actions with effort/impact
+- **Analysis Metadata**: Response times, confidence scores, pattern insights
 
 ## 📁 Structure
 
@@ -34,46 +41,30 @@ The interface will be available at: `http://localhost:8501`
 streamlit_app/
 ├── main.py                 # Landing page
 ├── pages/
-│   ├── 1_ingestion.py      # JSON upload + API call
-│   └── 2_analysis.py       # LLM analysis + display
+│   ├── 1_ingestion.py      # JSON upload + validation
+│   └── 2_analysis.py       # Latest + historical analysis
 ├── components/
-│   ├── api_client.py       # FastAPI HTTP client
-│   └── display.py          # Display components
-├── example_metrics.json    # Example for testing
-└── README.md               # This documentation
+│   ├── api_client.py       # FastAPI client
+│   └── display.py          # UI components
+└── example_metrics.json    # Test data
 ```
 
-## 🧪 Quick Test
+## 🧪 Test Flow
 
-1. **Start FastAPI** (in webservice/):
-   ```bash
-   uv run python main.py
-   ```
+1. **Start FastAPI**: `uv run python main.py` (in webservice/)
+2. **Start Streamlit**: `uv run streamlit run main.py` (in streamlit_app/)
+3. **Test ingestion**: Upload `example_metrics.json`
+4. **Test analysis**: Run both latest and historical analysis modes
 
-2. **Start Streamlit** (in streamlit_app/):
-   ```bash
-   uv run streamlit run main.py
-   ```
+## ⚠️ Current State
 
-3. **Test ingestion**:
-   - Go to "Ingestion"
-   - Upload `example_metrics.json`
-   - Click "Send to API"
-
-4. **Test analysis**:
-   - Go to "Analysis"
-   - Click "Run LLM Analysis"
-
-## ⚠️ Current Limitations
-
-- **Temporary persistence**: Data is lost when FastAPI restarts
-- **Streamlit session**: Basic tracking of ingested metrics
-- **No authentication**: Open access (planned for next phases)
-- **Single user**: Only one active session
+- **Temporary persistence**: Data lost on FastAPI restart
+- **No authentication**: Open access
+- **Single user session**: Basic tracking
 
 ## 📋 Next Phases
 
 - **Phase 1.6B**: SQLite persistence
-- **Phase 1.6C**: "jean/jean" authentication
+- **Phase 1.6C**: Authentication
 - **Phase 2.1**: Real-time mode
-- **Phase 2.2**: Historical analysis + charts 
+- **Phase 2.2**: Historical charts 
