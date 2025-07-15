@@ -150,6 +150,10 @@ def display_historical_analysis_results(analysis_data):
         with col2:
             st.write(f"**Probable Cause:** {pattern_interpretation.get('probable_cause', 'N/A')}")
             st.write(f"**Priority Metric:** {pattern_interpretation.get('priority_metric', 'N/A')}")
+        
+        metrics_to_watch = pattern_interpretation.get('metrics_to_watch', [])
+        if metrics_to_watch:
+            st.write(f"**Metrics to Watch:** {', '.join(metrics_to_watch)}")
     
     if severity_assessment:
         st.subheader("⚠️ Severity Assessment")

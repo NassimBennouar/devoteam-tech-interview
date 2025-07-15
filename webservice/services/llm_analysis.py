@@ -69,6 +69,7 @@ Response format must be valid JSON:
     "main_pattern": "Brief description of the primary pattern",
     "probable_cause": "Most likely root cause",
     "priority_metric": "Which metric needs immediate attention",
+    "metrics_to_watch": ["metric1", "metric2", "metric3"],
     "pattern_type": "recurring|escalating|sporadic|stable"
 }}"""),
             ("human", """Historical Anomaly Patterns:
@@ -82,7 +83,7 @@ TEMPORAL PATTERNS:
 CO-OCCURRENCE ANALYSIS:
 {cooccurrence}
 
-Analyze these patterns and provide insights in JSON format.""")
+Analyze these patterns and provide insights in JSON format. For metrics_to_watch, include 2-3 metrics that need close monitoring based on frequency, severity, or correlation patterns.""")
         ])
         
         # Chain 2: Severity Assessment
@@ -136,7 +137,10 @@ CURRENT METRICS:
 HISTORICAL CONTEXT:
 {historical_context}
 
-Provide comprehensive recommendations based on this analysis.""")
+ANOMALY BREAKDOWN:
+{anomaly_breakdown}
+
+Provide comprehensive recommendations based on this analysis. Pay special attention to the priority metric and metrics to watch when formulating strategic actions. Use the detailed anomaly breakdown to understand which specific metrics are most problematic.""")
         ])
         
         self.pattern_chain = self.pattern_interpretation_prompt | self.llm | self.output_parser
@@ -173,7 +177,8 @@ Provide comprehensive recommendations based on this analysis.""")
                 "pattern_interpretation": json.dumps(parallel_results["pattern_interpretation"]),
                 "severity_assessment": json.dumps(parallel_results["severity_assessment"]),
                 "current_metrics": self._format_metrics(current_metrics),
-                "historical_context": self._format_historical_context(patterns)
+                "historical_context": self._format_historical_context(patterns),
+                "anomaly_breakdown": self._format_anomaly_breakdown(patterns.get("breakdown", {}))
             }
             
             final_result = self.recommendations_chain.invoke(final_input)
@@ -315,6 +320,20 @@ Provide comprehensive recommendations based on this analysis.""")
             context.append(f"- Strongest correlation: {pair[0]} + {pair[1]} ({count} times)")
         
         return "\n".join(context)
+
+    def _format_anomaly_breakdown(self, breakdown: Dict[str, Any]) -> str:
+        """Format anomaly breakdown for historical recommendations"""
+        if not breakdown:
+            return "No specific anomaly breakdown available"
+        
+        formatted = ["Anomaly Breakdown:"]
+        for metric, data in breakdown.items():
+            warnings = data.get("warnings", 0)
+            critical = data.get("critical", 0)
+            total = data.get("total", 0)
+            formatted.append(f"- {metric}: {total} anomalies ({warnings} warnings, {critical} critical)")
+        
+        return "\n".join(formatted)
 
     def _parse_historical_response(self, response: Dict[str, Any]) -> AnalysisResult:
         """Parse LLM response from historical analysis"""
