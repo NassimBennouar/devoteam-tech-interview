@@ -75,8 +75,8 @@ DATABASE_URL=sqlite+aiosqlite:///./infra_monitoring.db
 
 ### Ports
 - **80**: Nginx (Frontend + API proxy)
-- **8000**: FastAPI (Direct access)
-- **8501**: Streamlit (Direct access)
+- **3000**: FastAPI (Direct access)
+- **3001**: Streamlit (Direct access)
 
 ## 📁 Project Structure
 
