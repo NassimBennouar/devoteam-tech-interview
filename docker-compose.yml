@@ -1,5 +1,5 @@
 services:
-  # FastAPI Backend
+
   api:
     build:
       context: ./webservice
@@ -17,7 +17,7 @@ services:
     networks:
       - monitoring_network
 
-  # Streamlit Frontend
+  
   frontend:
     build:
       context: ./streamlit_app
@@ -31,7 +31,7 @@ services:
     networks:
       - monitoring_network
 
-  # Nginx Reverse Proxy
+  
   nginx:
     image: nginx:alpine
     ports:
