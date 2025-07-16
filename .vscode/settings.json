@@ -1,0 +1,10 @@
+{
+    "python.pythonPath": "./notebooks/.venv/bin/python",
+    "python.defaultInterpreterPath": "./notebooks/.venv/bin/python",
+    "jupyter.kernels.filter": [
+        {
+            "path": "./notebooks/.venv/bin/python",
+            "type": "pythonEnvironment"
+        }
+    ]
+} 
