@@ -1,0 +1,53 @@
+services:
+  # FastAPI Backend
+  api:
+    build:
+      context: ./webservice
+      dockerfile: Dockerfile
+    ports:
+      - "3000:8000"
+    environment:
+      - DATABASE_URL=sqlite+aiosqlite:///./infra_monitoring.db
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - LANGSMITH_API_KEY=${LANGSMITH_API_KEY}
+      - DEBUG=false
+    volumes:
+      - ./webservice:/webservice
+      - api_data:/webservice/data
+    networks:
+      - monitoring_network
+
+  # Streamlit Frontend
+  frontend:
+    build:
+      context: ./streamlit_app
+      dockerfile: Dockerfile
+    ports:
+      - "3001:8501"
+    environment:
+      - API_BASE_URL=http://api:8000/api
+    depends_on:
+      - api
+    networks:
+      - monitoring_network
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - api
+      - frontend
+    networks:
+      - monitoring_network
+
+volumes:
+  api_data:
+
+networks:
+  monitoring_network:
+    driver: bridge 
