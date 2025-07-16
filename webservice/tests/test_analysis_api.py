@@ -1,8 +1,8 @@
 import pytest
 from unittest.mock import patch, Mock
 from fastapi.testclient import TestClient
-from webservice.main import app
-from webservice.models.analysis import AnalysisResult, Recommendation, RecommendationCategory
+from main import app
+from models.analysis import AnalysisResult, Recommendation, RecommendationCategory
 
 client = TestClient(app)
 

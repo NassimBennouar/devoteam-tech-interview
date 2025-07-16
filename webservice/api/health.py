@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from webservice.models.metrics import ApiResponse
+from models.metrics import ApiResponse
 from datetime import datetime
 import logging
 

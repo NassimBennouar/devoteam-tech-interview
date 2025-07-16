@@ -5,10 +5,10 @@ import logging
 import os
 from contextlib import asynccontextmanager
 
-from webservice.api.health import router as health_router
-from webservice.api.metrics import router as metrics_router
-from webservice.api.anomalies import router as anomalies_router
-from webservice.api.analysis import router as analysis_router
+from api.health import router as health_router
+from api.metrics import router as metrics_router
+from api.anomalies import router as anomalies_router
+from api.analysis import router as analysis_router
 
 DEBUG = os.getenv("DEBUG", "false").lower() == "true"
 

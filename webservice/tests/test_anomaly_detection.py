@@ -1,6 +1,6 @@
 import pytest
-from webservice.services.anomaly_detection import AnomalyDetectionService
-from webservice.models.anomaly import AnomalyType
+from services.anomaly_detection import AnomalyDetectionService
+from models.anomaly import AnomalyType
 
 
 @pytest.fixture

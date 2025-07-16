@@ -1,10 +1,12 @@
 import requests
 import streamlit as st
 import json
+import os
 
 class APIClient:
     def __init__(self):
-        self.base_url = "http://localhost:8000/api"
+        # Use environment variable or default to localhost:8000 for local dev
+        self.base_url = os.getenv("API_BASE_URL", "http://localhost:8000/api")
     
     def get_history(self, limit=100, start_time=None, end_time=None):
         """Get historical metrics data from FastAPI"""

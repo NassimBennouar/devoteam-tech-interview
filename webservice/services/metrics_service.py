@@ -2,7 +2,7 @@ from typing import List, Dict, Any, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy import desc
-from webservice.models.sql import Metrics
+from models.sql import Metrics
 import logging
 
 logger = logging.getLogger(__name__)

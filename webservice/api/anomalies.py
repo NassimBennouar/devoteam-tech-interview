@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, Depends
-from webservice.services.anomaly_detection import AnomalyDetectionService
-from webservice.services.metrics_service import MetricsService
-from webservice.models.anomaly import AnomalyResult
-from webservice.db import get_async_session
+from services.anomaly_detection import AnomalyDetectionService
+from services.metrics_service import MetricsService
+from models.anomaly import AnomalyResult
+from db import get_async_session
 from sqlalchemy.ext.asyncio import AsyncSession
 import logging
 import os

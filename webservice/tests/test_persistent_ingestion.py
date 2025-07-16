@@ -1,9 +1,9 @@
 import pytest
 import asyncio
 from httpx import AsyncClient, ASGITransport
-from webservice.main import app
-from webservice.db import engine, Base
-from webservice.models.sql import User, Infrastructure
+from main import app
+from db import engine, Base
+from models.sql import User, Infrastructure
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 import sqlalchemy
@@ -147,7 +147,7 @@ async def test_metrics_persistence_in_database(valid_metrics_data):
         response = await client.post("/api/ingest", json=valid_metrics_data)
         assert response.status_code == 200
         async with AsyncSession(engine) as session:
-            from webservice.models.sql import Metrics
+            from models.sql import Metrics
             result = await session.execute(select(Metrics))
             metrics = result.scalars().all()
             assert len(metrics) == 1
@@ -164,7 +164,7 @@ async def test_batch_persistence_in_database(valid_metrics_data):
         response = await client.post("/api/ingest", json=batch_data)
         assert response.status_code == 200
         async with AsyncSession(engine) as session:
-            from webservice.models.sql import Metrics
+            from models.sql import Metrics
             result = await session.execute(select(Metrics))
             metrics = result.scalars().all()
             assert len(metrics) == 3

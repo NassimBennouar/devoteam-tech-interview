@@ -1,5 +1,5 @@
 import pytest
-from webservice.services.validation import ValidationService
+from services.validation import ValidationService
 
 
 @pytest.fixture

@@ -14,9 +14,9 @@ from langchain.schema.runnable import RunnableParallel
 from langsmith import Client
 from langsmith.run_helpers import traceable
 
-from webservice.models.analysis import AnalysisResult, Recommendation, LLMAnalysisMetrics, RecommendationCategory
-from webservice.models.anomaly import AnomalyResult
-from webservice.models.metrics import InfrastructureMetrics
+from models.analysis import AnalysisResult, Recommendation, LLMAnalysisMetrics, RecommendationCategory
+from models.anomaly import AnomalyResult
+from models.metrics import InfrastructureMetrics
 
 load_dotenv()
 logger = logging.getLogger(__name__)

@@ -1,0 +1,24 @@
+[project]
+name = "infrastructure-monitoring-api"
+version = "0.1.0"
+description = "FastAPI backend for infrastructure monitoring"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi>=0.116.1",
+    "uvicorn>=0.35.0",
+    "pydantic>=2.11.7",
+    "sqlalchemy>=2.0.41",
+    "aiosqlite>=0.21.0",
+    "langchain>=0.3.26",
+    "langchain-openai>=0.3.28",
+    "langsmith>=0.4.5",
+    "python-dotenv>=1.1.1",
+    "httpx>=0.28.1",
+    "pytest>=8.4.1",
+    "pytest-asyncio>=1.0.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."] 

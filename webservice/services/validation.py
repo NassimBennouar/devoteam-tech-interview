@@ -1,7 +1,7 @@
 from typing import Dict, Any, List
 import logging
-from webservice.models.validation import ValidationResult, ValidationError
-from webservice.models.metrics import InfrastructureMetrics
+from models.validation import ValidationResult, ValidationError
+from models.metrics import InfrastructureMetrics
 
 logger = logging.getLogger(__name__)
 

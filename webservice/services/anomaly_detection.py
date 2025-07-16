@@ -1,7 +1,7 @@
 from typing import Dict, Any, List
 import logging
 from collections import deque, defaultdict
-from webservice.models.anomaly import Anomaly, AnomalyResult, AnomalyType
+from models.anomaly import Anomaly, AnomalyResult, AnomalyType
 import statistics
 import os
 from datetime import datetime

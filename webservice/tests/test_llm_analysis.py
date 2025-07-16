@@ -1,8 +1,8 @@
 import pytest
 from unittest.mock import Mock, patch, MagicMock
-from webservice.services.llm_analysis import LLMAnalysisService
-from webservice.models.analysis import AnalysisResult, Recommendation, RecommendationCategory
-from webservice.models.anomaly import AnomalyResult, Anomaly, AnomalyType
+from services.llm_analysis import LLMAnalysisService
+from models.analysis import AnalysisResult, Recommendation, RecommendationCategory
+from models.anomaly import AnomalyResult, Anomaly, AnomalyType
 
 
 @pytest.fixture

@@ -33,21 +33,21 @@ def test_debug_mode_enabled():
     with patch.dict(os.environ, {"DEBUG": "true"}):
         if 'webservice.main' in sys.modules:
             del sys.modules['webservice.main']
-        from webservice.main import DEBUG
+        from main import DEBUG
         assert DEBUG is True
 
 def test_debug_mode_disabled():
     with patch.dict(os.environ, {"DEBUG": "false"}):
         if 'webservice.main' in sys.modules:
             del sys.modules['webservice.main']
-        from webservice.main import DEBUG
+        from main import DEBUG
         assert DEBUG is False
 
 def test_debug_mode_default():
     with patch.dict(os.environ, {}, clear=True):
         if 'webservice.main' in sys.modules:
             del sys.modules['webservice.main']
-        from webservice.main import DEBUG
+        from main import DEBUG
         assert DEBUG is False
 
 def test_ingest_with_debug_timing(valid_metrics_data, caplog):
@@ -57,7 +57,7 @@ def test_ingest_with_debug_timing(valid_metrics_data, caplog):
         if 'webservice.api.metrics' in sys.modules:
             del sys.modules['webservice.api.metrics']
         
-        from webservice.main import app
+        from main import app
         client = TestClient(app)
         
         with caplog.at_level("DEBUG"):
@@ -72,7 +72,7 @@ def test_ingest_basic_logging(valid_metrics_data, caplog):
         if 'webservice.api.metrics' in sys.modules:
             del sys.modules['webservice.api.metrics']
         
-        from webservice.main import app
+        from main import app
         client = TestClient(app)
         
         with caplog.at_level("INFO"):

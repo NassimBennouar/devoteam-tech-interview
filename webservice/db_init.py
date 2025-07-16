@@ -1,6 +1,6 @@
 import asyncio
-from webservice.db import engine, Base
-from webservice.models.sql import User, Infrastructure
+from db import engine, Base
+from models.sql import User, Infrastructure
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 

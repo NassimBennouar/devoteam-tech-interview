@@ -2,8 +2,8 @@ from typing import Dict, Any, List, Optional
 import logging
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from webservice.models.sql import User, Infrastructure, Metrics
-from webservice.services.validation import ValidationService
+from models.sql import User, Infrastructure, Metrics
+from services.validation import ValidationService
 
 logger = logging.getLogger(__name__)
 

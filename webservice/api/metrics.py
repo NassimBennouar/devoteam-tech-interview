@@ -1,10 +1,10 @@
 from fastapi import APIRouter, status, Request, Depends, Query
 from fastapi.responses import JSONResponse
-from webservice.services.validation import ValidationService
-from webservice.services.persistence import PersistenceService
-from webservice.models.metrics import InfrastructureMetrics
-from webservice.models.validation import ValidationResult
-from webservice.db import get_async_session
+from services.validation import ValidationService
+from services.persistence import PersistenceService
+from models.metrics import InfrastructureMetrics
+from models.validation import ValidationResult
+from db import get_async_session
 from sqlalchemy.ext.asyncio import AsyncSession
 import logging
 import time
@@ -12,7 +12,7 @@ import os
 from typing import List, Dict, Any, Optional
 from sqlalchemy.future import select
 from sqlalchemy import func, desc
-from webservice.models.sql import Metrics
+from models.sql import Metrics
 
 router = APIRouter()
 validation_service = ValidationService()
